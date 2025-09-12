@@ -1,115 +1,139 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const RunMyApp());
+  runApp(MyApp());
 }
 
-class RunMyApp extends StatefulWidget {
-  const RunMyApp({super.key});
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: DefaultTabController(
+        length: 4,
+        child: _TabsNonScrollableDemo(),
+      ),
+    );
+  }
+}
+
+class _TabsNonScrollableDemo extends StatefulWidget {
+  @override
+  __TabsNonScrollableDemoState createState() => __TabsNonScrollableDemoState();
+}
+
+class __TabsNonScrollableDemoState extends State<_TabsNonScrollableDemo> with SingleTickerProviderStateMixin, RestorationMixin {
+  late TabController _tabController;
+  final RestorableInt tabIndex = RestorableInt(0);
 
   @override
-  State<RunMyApp> createState() => _RunMyAppState();
-}
+  String get restorationId => 'tab_non_scrollable_demo';
 
-class _RunMyAppState extends State<RunMyApp> {
-  ThemeMode _themeMode = ThemeMode.system;
+  @override
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+    registerForRestoration(tabIndex, 'tab_index');
+    _tabController.index = tabIndex.value;
+  }
 
-  void changeTheme(ThemeMode themeMode) {
-    setState(() {
-      _themeMode = themeMode;
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(
+      initialIndex: 0,
+      length: 4,
+      vsync: this,
+    );
+    _tabController.addListener(() {
+      setState(() {
+        tabIndex.value = _tabController.index;
+      });
     });
   }
 
   @override
-  Widget build(BuildContext context) {
-    return AnimatedTheme(
-      data: ThemeData(
-        brightness: _themeMode == ThemeMode.dark
-            ? Brightness.dark
-            : Brightness.light,
-        primarySwatch: Colors.blueGrey,
-      ),
-      duration: const Duration(milliseconds: 500),
-      child: MaterialApp(
-        theme: ThemeData(primarySwatch: Colors.blueGrey),
-        darkTheme: ThemeData.dark(),
-        themeMode: _themeMode,
-        debugShowCheckedModeBanner: false,
-        home: Scaffold(
-          appBar: AppBar(
-            title: const Text('Theme Demo'),
-          ),
-          body: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  'Choose the Theme:',
-                  style: TextStyle(fontSize: 18),
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        changeTheme(ThemeMode.light);
-                      },
-                      child: const Text("Light Theme"),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        changeTheme(ThemeMode.dark);
-                      },
-                      child: const Text("Dark Theme"),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    changeTheme(ThemeMode.system);
-                  },
-                  child: const Text("System Default"),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).push(_createFadeRoute());
-                  },
-                  child: const Text("Go to Settings Page"),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-    
+  void dispose() {
+    _tabController.dispose();
+    tabIndex.dispose();
+    super.dispose();
   }
-  PageRouteBuilder _createFadeRoute() {
-    return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) =>
-          const SettingsPage(),
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        return FadeTransition(
-          opacity: animation,
-          child: child,
-        );
-      },
-    );
-  }
-}
-
-class SettingsPage extends StatelessWidget {
-  const SettingsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final tabs = ['Tab1', 'Tab2', 'Tab3', 'Tab4'];
     return Scaffold(
-      appBar: AppBar(title: const Text("Settings")),
-      body: const Center(
-        child: Text("This is the Settings Page"),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: Text('Tabs Demo'),
+        backgroundColor: Colors.blue,
+        bottom: TabBar(
+          controller: _tabController,
+          isScrollable: false,
+          tabs: [
+            for (final tab in tabs) Tab(text: tab),
+          ],
+        ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          Container(
+            color: Colors.blue,
+            child: Center(
+              child: Image.asset(
+                'image/bear.webp',
+                width: 300,
+                height: 300,
+              ),
+            ),
+          ),
+          Container(
+            color: Colors.blue,
+            child: Center(
+              child: Image.asset(
+                'image/cat.jpg',
+                width: 300,
+                height: 300,
+              ),
+            ),
+          ),
+          Container(
+            color: Colors.blue,
+            child: Center(
+              child: Image.asset(
+                'image/lion.jpg',
+                width: 300,
+                height: 300,
+              ),
+            ),
+          ),
+          Container(
+            color: Colors.blue,
+            child: Center(
+              child: Image.asset(
+                'image/zebra.jpg',
+                width: 300,
+                height: 300,
+              ),
+            ),
+          ),
+        ],
+      ),
+      bottomNavigationBar: BottomAppBar(
+        color: Colors.blue,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            IconButton(
+              icon: Icon(Icons.home),
+              onPressed: () {
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.search),
+              onPressed: () {
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
