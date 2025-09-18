@@ -15,7 +15,16 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   String petName = "Your Pet";
   int happinessLevel = 50;
   int hungerLevel = 50;
+  Color color = Colors.green;
+  String emoji = "😊";
+  final myController = TextEditingController();
 
+  @override
+  void dispose() {
+    // Clean up the controller when the widget is disposed.
+    myController.dispose();
+    super.dispose();
+  }
   void _playWithPet() {
     setState(() {
       happinessLevel += 10;
@@ -36,6 +45,7 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
     } else {
       happinessLevel += 10;
     }
+    _updateFeeling();
   }
 
   void _updateHunger() {
@@ -44,6 +54,21 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
       if (hungerLevel > 100) {
         hungerLevel = 100;
         happinessLevel -= 20;
+      }
+    });
+    _updateFeeling();
+  }
+  void _updateFeeling() {
+    setState(() {
+      if (happinessLevel > 70) {
+        color = Colors.green;
+        emoji = "😊";
+      } else if (happinessLevel >= 30) {
+        color = Colors.yellow;
+        emoji = "😐";
+      } else {
+        color = Colors.red;
+        emoji = "😢";
       }
     });
   }
@@ -60,6 +85,7 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
           children: <Widget>[
             Text(
               'Name: $petName',
+              selectionColor: color,
               style: TextStyle(fontSize: 20.0),
             ),
             SizedBox(height: 16.0),
