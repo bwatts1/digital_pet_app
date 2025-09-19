@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -20,9 +21,27 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   int hungerLevel = 50;
   Color color = Colors.green;
   final myController = TextEditingController();
+  Timer? _hungerTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    // Start hunger timer
+    _hungerTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+      setState(() {
+        hungerLevel += 5;
+        if (hungerLevel > 100) {
+          hungerLevel = 100;
+          happinessLevel -= 20;
+        }
+        _updateFeeling();
+      });
+    });
+  }
 
   @override
   void dispose() {
+    _hungerTimer?.cancel();
     myController.dispose();
     super.dispose();
   }
@@ -49,6 +68,7 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   void _feedPet() {
     setState(() {
       hungerLevel -= 10;
+      if (hungerLevel < 0) hungerLevel = 0;
       _updateHappiness();
     });
   }
@@ -58,8 +78,7 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
       happinessLevel -= 20;
     } else if (hungerLevel == 0) {
       game = 'lost';
-    }
-    else {
+    } else {
       happinessLevel += 10;
     }
     _updateFeeling();
@@ -99,11 +118,14 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text('Name: $petName', style: TextStyle(fontSize: 20.0, color: color)),
+            Text('Name: $petName',
+                style: TextStyle(fontSize: 20.0, color: color)),
             const SizedBox(height: 16.0),
-            Text('Happiness Level: $happinessLevel', style: const TextStyle(fontSize: 20.0)),
+            Text('Happiness Level: $happinessLevel',
+                style: const TextStyle(fontSize: 20.0)),
             const SizedBox(height: 16.0),
-            Text('Hunger Level: $hungerLevel', style: const TextStyle(fontSize: 20.0)),
+            Text('Hunger Level: $hungerLevel',
+                style: const TextStyle(fontSize: 20.0)),
             const SizedBox(height: 32.0),
             Text(emoji, style: const TextStyle(fontSize: 50)),
             const SizedBox(height: 32.0),
@@ -119,6 +141,7 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
           ],
         ),
       ),
+      
       // Settings Page
       Center(
         child: Padding(
@@ -136,7 +159,8 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
               ElevatedButton(
                 onPressed: () {
                   setState(() {
-                    petName = myController.text.isEmpty ? petName : myController.text;
+                    petName =
+                        myController.text.isEmpty ? petName : myController.text;
                   });
                 },
                 child: const Text("Save Name"),
