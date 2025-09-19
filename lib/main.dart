@@ -19,6 +19,7 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   int _selectedPage = 0;
   int happinessLevel = 50;
   int hungerLevel = 50;
+  int energyLevel = 100; // <-- New Energy Level
   Color color = Colors.green;
   final myController = TextEditingController();
   Timer? _hungerTimer;
@@ -60,8 +61,12 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
 
   void _playWithPet() {
     setState(() {
-      happinessLevel += 10;
-      _updateHunger();
+      if (energyLevel > 0) {
+        happinessLevel += 10;
+        energyLevel -= 10; // Playing uses energy
+        if (energyLevel < 0) energyLevel = 0;
+        _updateHunger();
+      }
     });
   }
 
@@ -69,6 +74,8 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
     setState(() {
       hungerLevel -= 10;
       if (hungerLevel < 0) hungerLevel = 0;
+      energyLevel += 10; // Feeding restores energy
+      if (energyLevel > 100) energyLevel = 100;
       _updateHappiness();
     });
   }
@@ -110,6 +117,23 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
     }
   }
 
+  // Energy Bar Widget
+  Widget _buildEnergyBar() {
+    return Column(
+      children: [
+        const Text("Energy", style: TextStyle(fontSize: 18)),
+        const SizedBox(height: 8),
+        LinearProgressIndicator(
+          value: energyLevel / 100,
+          backgroundColor: Colors.grey[300],
+          color: Colors.blue,
+          minHeight: 15,
+        ),
+        Text("$energyLevel / 100"),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final List<Widget> _pages = [
@@ -138,10 +162,11 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
               onPressed: _feedPet,
               child: const Text('Feed Your Pet'),
             ),
+            const SizedBox(height: 32.0),
+            _buildEnergyBar(), // <-- Energy bar widget
           ],
         ),
       ),
-      
       // Settings Page
       Center(
         child: Padding(
