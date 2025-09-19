@@ -14,6 +14,7 @@ class DigitalPetApp extends StatefulWidget {
 class _DigitalPetAppState extends State<DigitalPetApp> {
   String petName = "Your Pet";
   String emoji = "😊";
+  String game = "playing"; // "playing", "won", "lost"
   int _selectedPage = 0;
   int happinessLevel = 50;
   int hungerLevel = 50;
@@ -55,7 +56,10 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   void _updateHappiness() {
     if (hungerLevel < 30) {
       happinessLevel -= 20;
-    } else {
+    } else if (hungerLevel == 0) {
+      game = 'lost';
+    }
+    else {
       happinessLevel += 10;
     }
     _updateFeeling();
@@ -71,7 +75,11 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   }
 
   void _updateFeeling() {
-    if (happinessLevel > 70) {
+    if (happinessLevel <= 0 || game == 'lost') {
+      color = Colors.grey;
+      emoji = "💀";
+      game = 'lost';
+    } else if (happinessLevel > 70) {
       color = Colors.green;
       emoji = "😊";
     } else if (happinessLevel >= 30) {
